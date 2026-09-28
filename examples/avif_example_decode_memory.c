@@ -100,12 +100,19 @@ int main(int argc, char * argv[])
         // Now available:
         // * RGB(A) pixel data (rgb.pixels, rgb.rowBytes)
 
+          printf("depth = %u, format = %d\n", rgb.depth, rgb.format);
         if (rgb.depth > 8) {
             uint16_t * firstPixel = (uint16_t *)rgb.pixels;
-            printf(" * First pixel: RGBA(%u,%u,%u,%u)\n", firstPixel[0], firstPixel[1], firstPixel[2], firstPixel[3]);
+            for (int i = 0; i < 1; i++) {
+                printf(" * First pixel: RGBA(%u,%u,%u,%u)\n", firstPixel[0], firstPixel[1], firstPixel[2], firstPixel[3]);
+                firstPixel += 4; // Advance to the next pixel (4 uint16_t values per pixel for RGBA)
+            }
         } else {
             uint8_t * firstPixel = rgb.pixels;
+          for (int i = 0; i < rgb.width; i++) {
             printf(" * First pixel: RGBA(%u,%u,%u,%u)\n", firstPixel[0], firstPixel[1], firstPixel[2], firstPixel[3]);
+            firstPixel += 4; // Advance to the next pixel (4 bytes per pixel for RGBA8)
+          }
         }
     }
 
