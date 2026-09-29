@@ -939,6 +939,31 @@ png_memory_flush(png_structp png_ptr)
   // DO nothing
 }
 
+typedef struct ExpandableBuff {
+  avifRWData data;
+  size_t written_len;
+} ExpandableBuff;
+
+ExpandableBuff* init_ExpandableBuff(void) {
+  ExpandableBuff* pBuff = (ExpandableBuff *)avifAlloc(sizeof(ExpandableBuff));
+  
+  pBuff->written_len = 0;
+  pBuff->data.data = (uint8_t *)avifAlloc(1024);
+  pBuff->data.size = 1024;
+
+  return pBuff;
+}
+
+void free_ExpandableBuff(ExpandableBuff* pBuff) {
+  if (pBuff == NULL) {
+    return;
+  }
+
+  avifFree(pBuff->data.data);
+  avifFree(pBuff);
+}
+
+
 avifBool avifPNGWriteToMemory(const void ** buff, const avifImage * avif, uint32_t requestedDepth, avifChromaUpsampling chromaUpsampling, int compressionLevel)
 {
     volatile avifBool writeResult = AVIF_FALSE;
