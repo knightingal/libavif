@@ -984,7 +984,7 @@ png_memory_write_data(png_structp png_ptr, png_bytep data, size_t length)
 
 
 
-avifBool avifPNGWriteToMemory(const void ** buff, const avifImage * avif, uint32_t requestedDepth, avifChromaUpsampling chromaUpsampling, int compressionLevel)
+avifBool avifPNGWriteToMemory(const avifImage * avif, uint32_t requestedDepth, avifChromaUpsampling chromaUpsampling, int compressionLevel)
 {
     volatile avifBool writeResult = AVIF_FALSE;
     png_structp png = NULL;

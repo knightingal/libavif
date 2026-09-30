@@ -33,6 +33,13 @@ avifBool avifPNGWrite(const char * outputFilename,
                       avifChromaUpsampling chromaUpsampling,
                       int compressionLevel);
 
+avifBool avifPNGWriteToMemory(
+  const avifImage * avif, 
+  uint32_t requestedDepth, 
+  avifChromaUpsampling chromaUpsampling, 
+  int compressionLevel
+);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
