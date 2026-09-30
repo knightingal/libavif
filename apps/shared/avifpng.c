@@ -967,13 +967,14 @@ void free_ExpandableBuff(ExpandableBuff* pBuff) {
 void PNGCBAPI
 png_memory_write_data(png_structp png_ptr, png_bytep data, size_t length)
 {
+  printf("write data %d\n", length);
   ExpandableBuff* io_ptr = png_get_io_ptr(png_ptr);
   size_t pre_write_len = io_ptr->written_len + length;
-  if (pre_write_len < io_ptr->data.size) {
+  if (pre_write_len > io_ptr->data.size) {
     size_t target_size = io_ptr->data.size;
     do {
       target_size *= 2;
-    } while (target_size < pre_write_len);
+    } while (target_size <= pre_write_len);
     avifRWDataRealloc(&io_ptr->data, target_size);
   }
 
