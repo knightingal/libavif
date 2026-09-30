@@ -986,11 +986,13 @@ png_memory_write_data(png_structp png_ptr, png_bytep data, size_t length)
 
 avifBool avifPNGWriteToMemory(const avifImage * avif, uint32_t requestedDepth, avifChromaUpsampling chromaUpsampling, int compressionLevel)
 {
+    printf("avifPNGWriteToMemory\n");
     volatile avifBool writeResult = AVIF_FALSE;
     png_structp png = NULL;
     png_infop info = NULL;
     avifRWData xmp = { NULL, 0 };
     png_bytep * volatile rowPointers = NULL;
+    ExpandableBuff *p_buff = NULL;
 
     avifRGBImage rgbData;
     memset(&rgbData, 0, sizeof(avifRGBImage));
@@ -1084,7 +1086,8 @@ avifBool avifPNGWriteToMemory(const avifImage * avif, uint32_t requestedDepth, a
 
     // png_init_io(png, f);
     // TODO: implement function write_data_fn 
-    png_set_write_fn(png, *buff, NULL, png_memory_flush);
+    p_buff = init_ExpandableBuff();
+    png_set_write_fn(png, p_buff, png_memory_write_data, png_memory_flush);
 
     // Don't bother complaining about ICC profile's contents when transferring from AVIF to PNG.
     // It is up to the enduser to decide if they want to keep their ICC profiles or not.
@@ -1237,11 +1240,16 @@ avifBool avifPNGWriteToMemory(const avifImage * avif, uint32_t requestedDepth, a
     png_write_end(png, NULL);
 
     writeResult = AVIF_TRUE;
+    FILE* f = fopen("output.png", "wb");
+    fwrite(p_buff->data.data, 1, p_buff->written_len, f);
+    fflush(f);
+    fclose(f);
     printf("Wrote PNG\n");
 cleanup:
     if (png) {
         png_destroy_write_struct(&png, &info);
     }
+    free_ExpandableBuff(p_buff);
     avifRWDataFree(&xmp);
     if (rowPointers) {
         free(rowPointers);
