@@ -939,13 +939,9 @@ png_memory_flush(png_structp png_ptr)
   // DO nothing
 }
 
-typedef struct ExpandableBuff {
-  avifRWData data;
-  size_t written_len;
-} ExpandableBuff;
 
-ExpandableBuff* init_ExpandableBuff(void) {
-  ExpandableBuff* pBuff = (ExpandableBuff *)avifAlloc(sizeof(ExpandableBuff));
+expandableBuff* init_expandableBuff(void) {
+  expandableBuff* pBuff = (expandableBuff *)avifAlloc(sizeof(expandableBuff));
   
   pBuff->written_len = 0;
   pBuff->data.data = (uint8_t *)avifAlloc(1024);
@@ -954,7 +950,7 @@ ExpandableBuff* init_ExpandableBuff(void) {
   return pBuff;
 }
 
-void free_ExpandableBuff(ExpandableBuff* pBuff) {
+void free_expandableBuff(expandableBuff* pBuff) {
   if (pBuff == NULL) {
     return;
   }
@@ -968,7 +964,7 @@ void PNGCBAPI
 png_memory_write_data(png_structp png_ptr, png_bytep data, size_t length)
 {
   printf("write data %d\n", length);
-  ExpandableBuff* io_ptr = png_get_io_ptr(png_ptr);
+  expandableBuff* io_ptr = png_get_io_ptr(png_ptr);
   size_t pre_write_len = io_ptr->written_len + length;
   if (pre_write_len > io_ptr->data.size) {
     size_t target_size = io_ptr->data.size;
@@ -984,7 +980,7 @@ png_memory_write_data(png_structp png_ptr, png_bytep data, size_t length)
 
 
 
-avifBool avifPNGWriteToMemory(const avifImage * avif, uint32_t requestedDepth, avifChromaUpsampling chromaUpsampling, int compressionLevel)
+expandableBuff* avifPNGWriteToMemory(const avifImage * avif, uint32_t requestedDepth, avifChromaUpsampling chromaUpsampling, int compressionLevel)
 {
     printf("avifPNGWriteToMemory\n");
     volatile avifBool writeResult = AVIF_FALSE;
@@ -992,7 +988,7 @@ avifBool avifPNGWriteToMemory(const avifImage * avif, uint32_t requestedDepth, a
     png_infop info = NULL;
     avifRWData xmp = { NULL, 0 };
     png_bytep * volatile rowPointers = NULL;
-    ExpandableBuff *p_buff = NULL;
+    expandableBuff *p_buff = NULL;
 
     avifRGBImage rgbData;
     memset(&rgbData, 0, sizeof(avifRGBImage));
@@ -1086,7 +1082,7 @@ avifBool avifPNGWriteToMemory(const avifImage * avif, uint32_t requestedDepth, a
 
     // png_init_io(png, f);
     // TODO: implement function write_data_fn 
-    p_buff = init_ExpandableBuff();
+    p_buff = init_expandableBuff();
     png_set_write_fn(png, p_buff, png_memory_write_data, png_memory_flush);
 
     // Don't bother complaining about ICC profile's contents when transferring from AVIF to PNG.
@@ -1240,20 +1236,20 @@ avifBool avifPNGWriteToMemory(const avifImage * avif, uint32_t requestedDepth, a
     png_write_end(png, NULL);
 
     writeResult = AVIF_TRUE;
-    FILE* f = fopen("output.png", "wb");
-    fwrite(p_buff->data.data, 1, p_buff->written_len, f);
-    fflush(f);
-    fclose(f);
-    printf("Wrote PNG\n");
+    // FILE* f = fopen("output.png", "wb");
+    // fwrite(p_buff->data.data, 1, p_buff->written_len, f);
+    // fflush(f);
+    // fclose(f);
+    // printf("Wrote PNG\n");
 cleanup:
     if (png) {
         png_destroy_write_struct(&png, &info);
     }
-    free_ExpandableBuff(p_buff);
+    // free_ExpandableBuff(p_buff);
     avifRWDataFree(&xmp);
     if (rowPointers) {
         free(rowPointers);
     }
     avifRGBImageFreePixels(&rgbData);
-    return writeResult;
+    return p_buff;
 }

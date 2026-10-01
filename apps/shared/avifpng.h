@@ -33,7 +33,12 @@ avifBool avifPNGWrite(const char * outputFilename,
                       avifChromaUpsampling chromaUpsampling,
                       int compressionLevel);
 
-avifBool avifPNGWriteToMemory(
+typedef struct expandableBuff {
+  avifRWData data;
+  size_t written_len;
+} expandableBuff;
+
+expandableBuff* avifPNGWriteToMemory(
   const avifImage * avif, 
   uint32_t requestedDepth, 
   avifChromaUpsampling chromaUpsampling, 
